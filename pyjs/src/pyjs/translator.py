@@ -175,8 +175,9 @@ for a in pyjs_vars_remap_names:
     pyjs_vars_remap.append(re.compile('^%s$' % a))
 
 # Attributes that should be remapped in classes
+# Note: keep this in sync with pyjslib!
 pyjs_attrib_remap_names = [\
-    'name', 'prototype', 'call', 'apply', 'constructor', 
+    'name', 'prototype', 'call', 'apply', 'constructor',
     # Specific for IE6:
     'default',
 ]

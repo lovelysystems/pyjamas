@@ -1416,18 +1416,39 @@ def _issubtype(object_, classinfo):
     return false;
     """)
 
+# Note: keep this in sync with the translator!
+JS("""
+pyjs_attrib_remap_mapping = new Object();
+pyjs_attrib_remap_mapping['name'] = ['name_'];
+pyjs_attrib_remap_mapping['prototype'] = ['prototype_'];
+pyjs_attrib_remap_mapping['call'] = ['call_'];
+pyjs_attrib_remap_mapping['apply'] = ['apply_'];
+pyjs_attrib_remap_mapping['constructor'] = ['constructor_'];
+pyjs_attrib_remap_mapping['default'] = ['default_'];
+""");
+
+@compiler.noSourceTracking
+def mappedName(name):
+    JS("""
+        var attr = pyjs_attrib_remap_mapping[name];
+        if (attr == undefined)
+            return name;
+        return attr;
+    """)
+
 @compiler.noSourceTracking
 def getattr(obj, name, default_value=None):
     JS("""
-    if ((!pyjslib.isObject(obj))||(pyjslib.isUndefined(obj[name]))){
+    var attr = pyjslib.mappedName(name);
+    if ((!pyjslib.isObject(obj))||(pyjslib.isUndefined(obj[attr]))){
         if (arguments.length != 3){
-            throw pyjslib.AttributeError(obj, name);
+            throw pyjslib.AttributeError(obj, attr);
         }else{
         return default_value;
         }
     }
-    if (!pyjslib.isFunction(obj[name])) return obj[name];
-    var method = obj[name];
+    if (!pyjslib.isFunction(obj[attr])) return obj[attr];
+    var method = obj[attr];
     var fnwrap = function() {
         var args = [];
         for (var i = 0; i < arguments.length; i++) {
@@ -1435,7 +1456,7 @@ def getattr(obj, name, default_value=None):
         }
         return method.apply(obj,args);
     };
-    fnwrap.__name__ = name;
+    fnwrap.__name__ = attr;
     fnwrap.__args__ = obj.__args__;
     fnwrap.__bind_type__ = obj.__bind_type__;
     return fnwrap;
@@ -1447,10 +1468,11 @@ def delattr(obj, name):
     if (!pyjslib.isObject(obj)) {
        throw pyjslib.AttributeError("'"+typeof(obj)+"' object has no attribute '"+name+"%s'")
     }
-    if ((pyjslib.isUndefined(obj[name])) ||(typeof(obj[name]) == "function") ){
+    var attr = pyjslib.mappedName(name);
+    if ((pyjslib.isUndefined(obj[attr])) ||(typeof(obj[attr]) == "function") ){
         throw pyjslib.AttributeError(obj.__name__+" instance has no attribute '"+ name+"'");
     }
-    delete obj[name];
+    delete obj[attr];
     """)
 
 @compiler.noSourceTracking
@@ -1458,7 +1480,8 @@ def setattr(obj, name, value):
     JS("""
     if (!pyjslib.isObject(obj)) return null;
 
-    obj[name] = value;
+    var attr = pyjslib.mappedName(name);
+    obj[attr] = value;
 
     """)
 
@@ -1466,7 +1489,8 @@ def setattr(obj, name, value):
 def hasattr(obj, name):
     JS("""
     if (!pyjslib.isObject(obj)) return false;
-    if (pyjslib.isUndefined(obj[name])) return false;
+    var attr = pyjslib.mappedName(name);
+    if (pyjslib.isUndefined(obj[attr])) return false;
 
     return true;
     """)
