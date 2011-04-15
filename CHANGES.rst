@@ -2,6 +2,12 @@
 Pyjamas Changes in Lovelysystems Branch
 =======================================
 
+2011/04/15 1.1.1
+================
+
+ - remove regex to test incoming JSON because firefox 4 raises exception on
+   large JSON strings
+
 2011/04/12 1.1.0
 ================
 

@@ -199,14 +199,9 @@ class JSONParser:
     def parseJSON(self, str):
         JS(r"""
         try {
-            return (/^("(\\.|[^"\\\n\r])*?"|[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t])+?$/.test(str)) &&
-                eval('(' + str + ')');
+            return eval('(' + str + ')');
         } catch (e) {
             return false;
         }
         """)
-    
-        
-        
-
 
